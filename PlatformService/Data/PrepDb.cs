@@ -26,25 +26,24 @@ namespace PlatformService.Data
                 } catch(Exception ex) {
                     Console.WriteLine($"-- Could not migrate migrations: {ex.Message}");
                 }
-            } else 
+            } 
+            
+            if(!context.Platforms.Any()) 
             {
-                if(!context.Platforms.Any()) 
-                {
-                    Console.WriteLine("-- Seeding Data --");
+                Console.WriteLine("-- Seeding Data --");
 
-                    context.Platforms.AddRange(
-                        new Platform() { Name = ".NET", Publisher="Microsoft", Cost="Free" },
-                        new Platform() { Name = "DotNetNuke", Publisher="Microsoft", Cost="Free" },
-                        new Platform() { Name = "SQL Server", Publisher="Microsoft", Cost="1.000.000 per day" },
-                        new Platform() { Name = "Azure", Publisher="Microsoft", Cost="2 livers per day" }
-                    );
+                context.Platforms.AddRange(
+                    new Platform() { Name = ".NET", Publisher="Microsoft", Cost="Free" },
+                    new Platform() { Name = "DotNetNuke", Publisher="Microsoft", Cost="Free" },
+                    new Platform() { Name = "SQL Server", Publisher="Microsoft", Cost="1.000.000 per day" },
+                    new Platform() { Name = "Azure", Publisher="Microsoft", Cost="2 livers per day" }
+                );
 
-                    context.SaveChanges();
-                }
-                else 
-                {
-                    Console.WriteLine("-- We already have data --");
-                }
+                context.SaveChanges();
+            }
+            else 
+            {
+                Console.WriteLine("-- We already have data --");
             }
         }
     }

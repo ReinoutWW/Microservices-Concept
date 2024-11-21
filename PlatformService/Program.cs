@@ -57,7 +57,7 @@ static void RegisterPlatformAPI(WebApplication app)
     .WithName("platforms")
     .WithOpenApi();
 
-    app.MapGet("/platform/{id:int}", (int id, PlatformsService service) =>
+    app.MapGet("/platforms/{id:int}", (int id, PlatformsService service) =>
     {
         var platform = service.GetPlaformById(id);
         return platform is not null
@@ -67,7 +67,7 @@ static void RegisterPlatformAPI(WebApplication app)
     .WithName("GetPlatformById")
     .WithOpenApi();
 
-    app.MapPost("/platform", async (
+    app.MapPost("/platforms", async (
         PlatformCreateDTO platform, 
         PlatformsService service, 
         ICommandDataClient commandDataClient 
