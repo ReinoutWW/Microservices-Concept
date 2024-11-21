@@ -6,11 +6,11 @@ namespace PlatformService.Profiles
 {
     public class PlatformProfile : Profile
     {
-        public void PlatformsProfile()
+        public PlatformProfile()
         {
             // Source -> Target
             CreateMap<Platform, PlatformReadDTO>();
-            CreateMap<Platform, PlatformCreateDTO>();
+            CreateMap<PlatformCreateDTO, Platform>();
         }
     }
 }
