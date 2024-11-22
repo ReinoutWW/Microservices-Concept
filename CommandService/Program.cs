@@ -1,5 +1,7 @@
+using CommandService.AsyncDataServices;
 using CommandService.Data;
 using CommandService.DTO;
+using CommandService.EventProcessing;
 using CommandService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +19,8 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("InMem"));
 
 builder.Services.AddScoped<ICommandRepo, CommandRepo>();
+builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
+builder.Services.AddHostedService<MessageBusSubscriber>();
 
 var app = builder.Build();
 
@@ -66,7 +70,7 @@ app.MapGet(baseUrl + "/{id:int}/commands", (int id, [FromServices] CommandServic
     }
 }).WithName("GetCommandsByPlatformId").WithOpenApi();;
 
-app.MapGet(baseUrl + "/{platformId:int}/commands/{commandId:int}", (int platformId, int commandId, [FromServices] CommandService.Services.CommandService service) =>
+app.MapGet(baseUrl + "/{platformId}/commands/{commandId}", (int platformId, int commandId, [FromServices] CommandService.Services.CommandService service) =>
 {
     try
     {
@@ -82,9 +86,9 @@ app.MapGet(baseUrl + "/{platformId:int}/commands/{commandId:int}", (int platform
         Console.WriteLine($"KeyNotFoundException: {ex.Message}");
         return Results.NotFound(new { message = $"Command ({commandId}) not found for Platform ({platformId}) not found" });
     }
-}).WithName("GetCommandForPlatform").WithOpenApi();;
+}).WithName("GetCommandById").WithOpenApi();;
 
-app.MapPost(baseUrl + "/{platformId}/commands", async (int platformId, [FromBody] CommandCreateDTO commandDto, [FromServices] CommandService.Services.CommandService service) =>
+app.MapPost(baseUrl + "/{platformId}/commands", (int platformId, [FromBody] CommandCreateDTO commandDto, [FromServices] CommandService.Services.CommandService service) =>
 {
     try
     {
@@ -93,9 +97,14 @@ app.MapPost(baseUrl + "/{platformId}/commands", async (int platformId, [FromBody
         // Use the service to create the command
         var createdCommand = service.CreateCommandForPlatform(platformId, commandDto);
 
+        // Define a named route for CreatedAtRoute
+        var routeName = "GetCommandById";
+
+        // Ensure a corresponding GET route exists for this route name
         return Results.CreatedAtRoute(
-            $"{baseUrl}/{platformId}/command/{createdCommand.Id}", 
-            new { platformId = platformId, commandId = createdCommand.Id }, createdCommand);
+            routeName,
+            new { platformId = platformId, commandId = createdCommand.Id },
+            createdCommand);
     }
     catch (KeyNotFoundException ex)
     {
@@ -108,10 +117,6 @@ app.MapPost(baseUrl + "/{platformId}/commands", async (int platformId, [FromBody
         return Results.Problem("An error occurred while creating the command.");
     }
 });
-
-
-
-
 
 
 app.Run();

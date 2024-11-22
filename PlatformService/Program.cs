@@ -1,4 +1,6 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using PlatformService.AsyncDataServices;
 using PlatformService.Data;
 using PlatformService.DTO;
 using PlatformService.Services;
@@ -26,6 +28,7 @@ builder.Services.AddScoped<IPlatformRepo, PlatformRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<PlatformsService>();
 builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
+builder.Services.AddSingleton<IMessageBusClient, MessageBusClient>();
 
 
 
@@ -70,15 +73,29 @@ static void RegisterPlatformAPI(WebApplication app)
     app.MapPost("/platforms", async (
         PlatformCreateDTO platform, 
         PlatformsService service, 
-        ICommandDataClient commandDataClient 
+        ICommandDataClient commandDataClient,
+        IMapper mapper,
+        IMessageBusClient messageBusClient
     ) =>
     {
         PlatformReadDTO platformReadDto = service.CreatePlatform(platform);
         
+        // Send Sync Message
         try {
             await commandDataClient.SendPlatformToCommand(platformReadDto);
         } catch(Exception ex) {
             Console.WriteLine($"-- Could not send synchronously: {ex.Message}");
+        }
+
+        // Send Async message
+        try
+        {
+            var platformPublishedDTO = mapper.Map<PlatformPublishedDTO>(platformReadDto);
+            platformPublishedDTO.Event = "Platform_Published";
+            messageBusClient.PublishNewPlatform(platformPublishedDTO);
+        } catch(Exception ex)
+        {
+            Console.WriteLine($"-- Could not send asynchronously: {ex.Message}");
         }
 
         return Results.CreatedAtRoute(
