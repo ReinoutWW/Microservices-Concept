@@ -1,5 +1,7 @@
 using AutoMapper;
 using CommandService.Data;
+using CommandService.DTO;
+using CommandService.Models;
 
 namespace CommandService.Services
 {
@@ -17,6 +19,13 @@ namespace CommandService.Services
         public void TestInboundConnection() 
         {
             Console.WriteLine("-- Inbound POST in the CommandService service --");
+        }
+
+        public List<PlatformReadDTO> GetAllPlatforms() 
+        {
+            var platformItems = _repository.GetAllPlatforms();
+
+            return _mapper.Map<IEnumerable<PlatformReadDTO>>(platformItems).ToList();
         }
     }
 }
