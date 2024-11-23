@@ -7,6 +7,8 @@ spec:
   selector:
     matchLabels:
       app: mysql
+  securityContext:
+    fsGroup: 999
   template:
     metadata:
       labels:
