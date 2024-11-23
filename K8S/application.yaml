@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: microservices-concept
+  namespace: argocd
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/ReinoutWW/Microservices-Concept.git
+    targetRevision: HEAD
+    path: K8S/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: microservices-demo
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+
+    automated:
+      selfHeal: true
+      prune: true
