@@ -12,3 +12,4 @@ spec:
   nfs:
     path: /mnt/user/reinout
     server: 192.168.178.101
+  storageClassName: ""
