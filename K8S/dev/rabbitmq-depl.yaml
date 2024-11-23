@@ -42,9 +42,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: rabbitmq-loadbalancer
+  name: rabbitmq-nodeport
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: rabbitmq
   ports:
@@ -52,7 +52,9 @@ spec:
     protocol: TCP
     port: 15672
     targetPort: 15672
+    NodePort: 30102
   - name: rbmq-msg-port
     protocol: TCP
     port: 5672
     targetPort: 5672
+    NodePort: 30103
