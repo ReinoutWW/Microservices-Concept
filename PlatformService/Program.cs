@@ -4,6 +4,7 @@ using PlatformService.AsyncDataServices;
 using PlatformService.Data;
 using PlatformService.DTO;
 using PlatformService.Services;
+using PlatformService.SyncDataServices.Grpc;
 using PlatformService.SyncDataServices.Http;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,8 +30,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<PlatformsService>();
 builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
 builder.Services.AddSingleton<IMessageBusClient, MessageBusClient>();
-
-
+builder.Services.AddGrpc();
 
 var app = builder.Build();
 
@@ -42,6 +42,22 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.MapGrpcService<GrpcPlatformServie>();
+
+app.MapGet("/protos/platforms.proto", async context =>
+{
+    await context.Response.WriteAsync(File.ReadAllText("Protos/platforms.proto"));
+});
+
+
+// app.UseEndpoints(endpoints => {
+//     endpoints.MapGrpcService<GrpcPlatformServie>();
+
+//     endpoints.MapGet("/protos/platforms.proto", async context => {
+//         await context.Response.WriteAsync(File.ReadAllText("Protos/platforms.proto"));
+//     });
+// });
 
 Console.WriteLine($"-- CommandService Endpoint {app.Configuration["CommandService"]}");
 
