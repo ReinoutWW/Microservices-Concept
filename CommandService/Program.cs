@@ -3,6 +3,7 @@ using CommandService.Data;
 using CommandService.DTO;
 using CommandService.EventProcessing;
 using CommandService.Services;
+using CommandService.SyncDataServices.Grpc;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,8 +22,11 @@ builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("InMe
 builder.Services.AddScoped<ICommandRepo, CommandRepo>();
 builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 builder.Services.AddHostedService<MessageBusSubscriber>();
+builder.Services.AddScoped<IPlatformDataClient, PlatformDataClient>();
 
 var app = builder.Build();
+
+PrepDb.PrepPopulation(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

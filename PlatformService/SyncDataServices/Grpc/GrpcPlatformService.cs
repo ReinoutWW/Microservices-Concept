@@ -14,6 +14,7 @@ namespace PlatformService.SyncDataServices.Grpc
         {
             _repository = repository;
             _mapper = mapper;
+            Console.WriteLine("-- GrpcPlatformService configured!");
         }
 
         public override Task<PlatformResponse> GetAllPlatforms(GetAllRequest request, ServerCallContext context)

@@ -9,6 +9,22 @@ using PlatformService.SyncDataServices.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// builder.WebHost.ConfigureKestrel(options =>
+// {
+//     // HTTP/2 for gRPC on port 777
+//     options.ListenLocalhost(777, listenOptions =>
+//     {
+//         listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+//         listenOptions.UseHttps(); // gRPC requires HTTPS
+//     });
+
+//     // HTTP/1.1 for Minimal API on port 5086
+//     options.ListenLocalhost(5086, listenOptions =>
+//     {
+//         listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1;
+//     });
+// });
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -43,27 +59,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGrpcService<GrpcPlatformServie>();
+Console.WriteLine($"-- CommandService Endpoint {app.Configuration["CommandService"]}");
 
+RegisterPlatformAPI(app);
+
+app.MapGrpcService<GrpcPlatformServie>();
 app.MapGet("/protos/platforms.proto", async context =>
 {
     await context.Response.WriteAsync(File.ReadAllText("Protos/platforms.proto"));
 });
-
-
-// app.UseEndpoints(endpoints => {
-//     endpoints.MapGrpcService<GrpcPlatformServie>();
-
-//     endpoints.MapGet("/protos/platforms.proto", async context => {
-//         await context.Response.WriteAsync(File.ReadAllText("Protos/platforms.proto"));
-//     });
-// });
-
-Console.WriteLine($"-- CommandService Endpoint {app.Configuration["CommandService"]}");
-
-//app.UseHttpsRedirection();
-
-RegisterPlatformAPI(app);
 
 app.Run();
 
