@@ -3,11 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: mssql-claim
 spec:
+  storageClassName: nfs-csi
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: 200Mi
-  selector:
-    matchLabels:
-      name: nfs-pv
